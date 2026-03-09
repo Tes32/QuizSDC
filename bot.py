@@ -90,7 +90,7 @@ async def esame(update: Update, context: ContextTypes.DEFAULT_TYPE):
     wrong_answers[chat_id] = 0
     asked_questions[chat_id] = []
 
-    await update.message.reply_text("📝 Modalità esame iniziata (30 domande)")
+    await update.message.reply_text("📝 Modalità esame iniziata (4 domande)")
 
     await send_question(chat_id, context)
 
