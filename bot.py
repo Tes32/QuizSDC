@@ -110,10 +110,7 @@ if scelta == q["corretta"]:
 else:
     wrong_answers[chat_id] += 1
     risposta = f"❌ Sbagliato!\nRisposta corretta: {q['opzioni'][q['corretta']]}\n\n{q['soluzione']}"
-        risposta = "✅ Corretto!"
-    else:
-        risposta = f"❌ Sbagliato!\nRisposta corretta: {q['opzioni'][q['corretta']]}\n\n{q['soluzione']}"
-
+    
     await query.edit_message_text(query.message.text + "\n\n" + risposta)
 
 if exam_mode.get(chat_id):
