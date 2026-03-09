@@ -83,7 +83,7 @@ async def esame(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.message.chat_id
 
     exam_mode[chat_id] = True
-    exam_remaining[chat_id] = 30
+    exam_remaining[chat_id] = 4
 
     score[chat_id] = 0
     total_answered[chat_id] = 0
