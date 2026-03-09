@@ -3,7 +3,7 @@ import random
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes
 
-TOKEN = "8755489417:AAG8zB17ifshK_ZHNnWeNFzcPaxC55vD20Q"
+TOKEN = "8680727725:AAHo-mPTtoB89YdViK7tTe9M94kwfTNNQHw"
 
 df = pd.read_excel("domande.xlsx")
 
