@@ -23,12 +23,47 @@ for _, row in df.iterrows():
     })
 
 current_question = {}
+asked_questions = {}
+score = {}
+total_answered = {}
+wrong_answers = {}
+exam_mode = {}
+exam_remaining = {}
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await send_question(update.message.chat_id, context)
+    chat_id = update.message.chat_id
+    
+    asked_questions[chat_id] = []
+    score[chat_id] = 0
+    total_answered[chat_id] = 0
+    wrong_answers[chat_id] = 0
+    exam_mode[chat_id] = False
+
+    await send_question(chat_id, context)
 
 async def send_question(chat_id, context):
-    q = random.choice(questions)
+
+    if chat_id not in asked_questions:
+        asked_questions[chat_id] = []
+
+    remaining = [q for q in questions if q not in asked_questions[chat_id]]
+
+    if not remaining:
+        percent = round((score[chat_id] / total_answered[chat_id]) * 100, 1)
+
+        await context.bot.send_message(
+            chat_id=chat_id,
+            text=f"📊 Quiz finito!\n\n"
+                 f"Domande totali: {total_answered[chat_id]}\n"
+                 f"Corrette: {score[chat_id]}\n"
+                 f"Sbagliate: {wrong_answers[chat_id]}\n"
+                 f"Punteggio: {percent}%"
+        )
+
+        return
+    q = random.choice(remaining)
+
+    asked_questions[chat_id].append(q)
     current_question[chat_id] = q
 
     keyboard = []
@@ -43,6 +78,22 @@ async def send_question(chat_id, context):
         reply_markup=reply_markup
     )
 
+async def esame(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    chat_id = update.message.chat_id
+
+    exam_mode[chat_id] = True
+    exam_remaining[chat_id] = 30
+
+    score[chat_id] = 0
+    total_answered[chat_id] = 0
+    wrong_answers[chat_id] = 0
+    asked_questions[chat_id] = []
+
+    await update.message.reply_text("📝 Modalità esame iniziata (30 domande)")
+
+    await send_question(chat_id, context)
+
 async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -51,17 +102,45 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
     scelta = int(query.data)
     q = current_question[chat_id]
 
-    if scelta == q["corretta"]:
+    total_answered[chat_id] += 1
+
+if scelta == q["corretta"]:
+    score[chat_id] += 1
+    risposta = f"✅ Corretto!\nPunteggio: {score[chat_id]}"
+else:
+    wrong_answers[chat_id] += 1
+    risposta = f"❌ Sbagliato!\nRisposta corretta: {q['opzioni'][q['corretta']]}\n\n{q['soluzione']}"
         risposta = "✅ Corretto!"
     else:
         risposta = f"❌ Sbagliato!\nRisposta corretta: {q['opzioni'][q['corretta']]}\n\n{q['soluzione']}"
 
     await query.edit_message_text(query.message.text + "\n\n" + risposta)
 
+if exam_mode.get(chat_id):
+
+    exam_remaining[chat_id] -= 1
+
+    if exam_remaining[chat_id] <= 0:
+
+        percent = round((score[chat_id] / total_answered[chat_id]) * 100, 1)
+
+        await context.bot.send_message(
+            chat_id=chat_id,
+            text=f"🎓 Esame terminato!\n\n"
+                 f"Domande: {total_answered[chat_id]}\n"
+                 f"Corrette: {score[chat_id]}\n"
+                 f"Sbagliate: {wrong_answers[chat_id]}\n"
+                 f"Punteggio finale: {percent}%"
+        )
+
+        exam_mode[chat_id] = False
+        return
+
     await send_question(chat_id, context)
 
 app = ApplicationBuilder().token(TOKEN).build()
 
+app.add_handler(CommandHandler("esame", esame))
 app.add_handler(CommandHandler("start", start))
 app.add_handler(CallbackQueryHandler(answer))
 
