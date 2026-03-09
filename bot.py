@@ -133,8 +133,24 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await send_question(chat_id, context)
 
+async def exit_session(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat_id = update.message.chat_id
+
+    # Reset della sessione
+    asked_questions[chat_id] = []
+    score[chat_id] = 0
+    total_answered[chat_id] = 0
+    wrong_answers[chat_id] = 0
+    exam_mode[chat_id] = False
+    exam_remaining[chat_id] = 0
+    current_question[chat_id] = None
+
+    await update.message.reply_text("❌ Sessione terminata. Puoi fare /start per ricominciare.")
+    
+
 app = ApplicationBuilder().token(TOKEN).build()
 
+app.add_handler(CommandHandler("exit", exit_session))
 app.add_handler(CommandHandler("esame", esame))
 app.add_handler(CommandHandler("start", start))
 app.add_handler(CallbackQueryHandler(answer))
