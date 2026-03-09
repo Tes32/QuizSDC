@@ -104,34 +104,32 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     total_answered[chat_id] += 1
 
-if scelta == q["corretta"]:
-    score[chat_id] += 1
-    risposta = f"✅ Corretto!\nPunteggio: {score[chat_id]}"
-else:
-    wrong_answers[chat_id] += 1
-    risposta = f"❌ Sbagliato!\nRisposta corretta: {q['opzioni'][q['corretta']]}\n\n{q['soluzione']}"
-    
+    if scelta == q["corretta"]:
+        score[chat_id] += 1
+        risposta = f"✅ Corretto!\nPunteggio: {score[chat_id]}"
+    else:
+        wrong_answers[chat_id] += 1
+        risposta = f"❌ Sbagliato!\nRisposta corretta: {q['opzioni'][q['corretta']]}\n\n{q['soluzione']}"
+
     await query.edit_message_text(query.message.text + "\n\n" + risposta)
 
-if exam_mode.get(chat_id):
+    if exam_mode.get(chat_id):
+        exam_remaining[chat_id] -= 1
 
-    exam_remaining[chat_id] -= 1
+        if exam_remaining[chat_id] <= 0:
+            percent = round((score[chat_id] / total_answered[chat_id]) * 100, 1)
 
-    if exam_remaining[chat_id] <= 0:
+            await context.bot.send_message(
+                chat_id=chat_id,
+                text=f"🎓 Esame terminato!\n\n"
+                     f"Domande: {total_answered[chat_id]}\n"
+                     f"Corrette: {score[chat_id]}\n"
+                     f"Sbagliate: {wrong_answers[chat_id]}\n"
+                     f"Punteggio finale: {percent}%"
+            )
 
-        percent = round((score[chat_id] / total_answered[chat_id]) * 100, 1)
-
-        await context.bot.send_message(
-            chat_id=chat_id,
-            text=f"🎓 Esame terminato!\n\n"
-                 f"Domande: {total_answered[chat_id]}\n"
-                 f"Corrette: {score[chat_id]}\n"
-                 f"Sbagliate: {wrong_answers[chat_id]}\n"
-                 f"Punteggio finale: {percent}%"
-        )
-
-        exam_mode[chat_id] = False
-        return
+            exam_mode[chat_id] = False
+            return
 
     await send_question(chat_id, context)
 
