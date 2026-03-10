@@ -2,8 +2,11 @@ import pandas as pd
 import random
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes
+import os
 
-TOKEN = "8068550333:AAGen4e5cv8aELD4Syh9MDJRXfnjy628l-c"
+TOKEN = os.getenv("BOT_TOKEN")
+if not TOKEN:
+    reaise ValueError("BOT_TOKEN non trovato nelle variabili d'ambiente")
 
 df = pd.read_excel("domande.xlsx")
 
