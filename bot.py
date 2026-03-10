@@ -6,7 +6,7 @@ import os
 
 TOKEN = os.getenv("BOT_TOKEN")
 if not TOKEN:
-    reaise ValueError("BOT_TOKEN non trovato nelle variabili d'ambiente")
+    raise ValueError("BOT_TOKEN non trovato nelle variabili d'ambiente")
 
 df = pd.read_excel("domande.xlsx")
 
