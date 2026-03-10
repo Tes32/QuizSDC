@@ -147,6 +147,33 @@ async def exit_session(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text("❌ Sessione terminata. Puoi fare /start per ricominciare.")
     
+import os
+from flask import Flask
+from threading import Thread
+
+# --- SEZIONE KEEP ALIVE ---
+app_web = Flask('')
+
+@app_web.route('/')
+def home():
+    return "Bot is alive!"
+
+def run():
+    # Render assegna automaticamente una porta, di solito la 10000
+    port = int(os.environ.get("PORT", 10000))
+    app_web.run(host='0.0.0.0', port=port)
+
+def keep_alive():
+    t = Thread(target=run)
+    t.start()
+# ---------------------------
+
+if __name__ == "__main__":
+    # Avviamo il server web prima del bot
+    keep_alive()
+    
+    # Avvio del bot Telegram
+print("Bot in esecuzione...")
 
 app = ApplicationBuilder().token(TOKEN).build()
 
